@@ -675,7 +675,7 @@
 
         @media (max-width: 768px) {
             body {
-                padding: 16px;
+                padding: 12px;
             }
 
             .container {
@@ -683,79 +683,145 @@
             }
 
             .header {
-                padding: 32px 24px;
+                padding: 24px 20px;
+                flex-direction: column;
+                align-items: center;
             }
 
             .header h1 {
                 font-size: 2.25rem;
+                text-align: center;
             }
 
             .header p {
                 font-size: 1rem;
+                text-align: center;
             }
             
-            .controls {
-                padding: 24px;
+            /* Mobile styles for info box */
+            .header div[style*="margin-top: 16px"] {
+                margin-top: 20px !important;
+                padding: 16px !important;
+                max-width: 100% !important;
+            }
+            
+            .header div[style*="margin-top: 16px"] p {
+                font-size: 0.8rem !important;
+                line-height: 1.4 !important;
+            }
+            
+            /* Mobile styles for details/summary */
+            details {
+                margin-top: 16px !important;
+                padding: 12px 16px !important;
+            }
+            
+            details summary {
+                font-size: 0.8rem !important;
+                padding: 8px 0 !important;
+            }
+            
+            details div {
+                font-size: 0.75rem !important;
+                line-height: 1.5 !important;
+                margin-top: 8px !important;
+            }
+            
+            details ul li {
+                margin-bottom: 4px !important;
+            }
+            
+            details ul ul li {
+                margin-bottom: 2px !important;
             }
 
             .search-filter {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 16px;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 16px !important;
             }
             
             .search-box {
-                min-width: auto;
+                min-width: auto !important;
             }
 
             .search-box input {
                 padding: 14px 20px;
+                font-size: 16px; /* Prevent zoom on iOS */
             }
             
             .filter-group {
                 justify-content: center;
-                gap: 8px;
+                gap: 8px !important;
+                flex-wrap: wrap !important;
             }
 
             .filter-select {
                 padding: 10px 36px 10px 16px;
                 font-size: 14px;
+                min-width: 120px;
+                flex: 0 0 auto;
             }
             
-            .stats {
-                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-                gap: 16px;
-                margin-top: 24px;
+            /* Mobile styles for compact stats */
+            div[style*="border-top: 1px solid"] {
+                flex-direction: column !important;
+                gap: 8px !important;
+                align-items: center !important;
+                padding: 16px 0 !important;
+                margin-top: 16px !important;
             }
-
-            .stat-item {
-                padding: 20px 16px;
-            }
-
-            .stat-number {
-                font-size: 1.875rem;
-            }
-
-            .stat-label {
-                font-size: 0.75rem;
+            
+            div[style*="border-top: 1px solid"] > div {
+                justify-content: center !important;
             }
 
             .table-container {
                 padding: 16px;
             }
             
+            .data-table {
+                font-size: 12px;
+            }
+            
             .data-table th,
             .data-table td {
-                padding: 12px 8px;
-                font-size: 12px;
+                padding: 8px 4px;
+                font-size: 11px;
             }
 
             .data-table th {
-                padding: 16px 8px;
+                padding: 12px 4px;
+                font-size: 12px;
             }
             
             .score-chart-container {
                 height: 100px;
+                min-width: 200px;
+            }
+            
+            .score-cell {
+                min-width: 200px;
+                max-width: 250px;
+            }
+            
+            /* Make table horizontally scrollable on mobile */
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            #toggleAllCategories {
+                font-size: 12px !important;
+                padding: 8px 16px !important;
+                margin-bottom: 16px;
+            }
+            
+            /* Improve tag display on mobile */
+            .tag {
+                font-size: 10px;
+                padding: 4px 8px;
+                margin: 1px;
             }
         }
 
@@ -763,16 +829,110 @@
             .header {
                 flex-direction: column;
                 align-items: center;
-                padding: 28px 10px 24px 10px;
+                padding: 20px 16px 20px 16px;
             }
             .github-badge-bar {
                 position: static;
-                margin: 0 auto 10px auto;
+                margin: 0 auto 16px auto;
                 left: 0;
                 right: 0;
                 top: 0;
-                transform: scale(1);
+                transform: scale(0.9);
                 justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+            
+            .header {
+                padding: 16px 12px;
+            }
+            
+            .header h1 {
+                font-size: 1.875rem;
+            }
+            
+            .header p {
+                font-size: 0.9rem;
+            }
+            
+            /* Very small screen adjustments for info box */
+            .header div[style*="margin-top: 16px"] {
+                padding: 12px !important;
+                margin-top: 16px !important;
+            }
+            
+            .header div[style*="margin-top: 16px"] p {
+                font-size: 0.75rem !important;
+                line-height: 1.3 !important;
+            }
+            
+            details summary {
+                font-size: 0.75rem !important;
+            }
+            
+            details div {
+                font-size: 0.7rem !important;
+            }
+            
+            .search-box input {
+                padding: 12px 16px;
+                font-size: 16px;
+            }
+            
+            .filter-select {
+                font-size: 13px;
+                padding: 8px 32px 8px 12px;
+                min-width: 100px;
+            }
+            
+            /* Stack stats vertically on very small screens */
+            div[style*="border-top: 1px solid"] {
+                padding: 12px 0 !important;
+                gap: 6px !important;
+            }
+            
+            div[style*="border-top: 1px solid"] > div {
+                font-size: 0.8rem !important;
+            }
+            
+            div[style*="border-top: 1px solid"] span[style*="font-size: 1rem"] {
+                font-size: 0.9rem !important;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 6px 3px;
+                font-size: 10px;
+            }
+            
+            .data-table th {
+                font-size: 11px;
+                padding: 10px 3px;
+            }
+            
+            .score-chart-container {
+                height: 80px;
+                min-width: 180px;
+                padding: 8px;
+            }
+            
+            .score-cell {
+                min-width: 180px;
+                max-width: 200px;
+            }
+            
+            #toggleAllCategories {
+                font-size: 11px !important;
+                padding: 6px 12px !important;
+            }
+            
+            .tag {
+                font-size: 9px;
+                padding: 3px 6px;
             }
         }
 
@@ -935,6 +1095,44 @@
             background: #eef2ff;
             color: #3730a3;
         }
+
+        /* Details/Summary styles */
+        details {
+            border: none !important;
+        }
+        
+        details summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+        
+        details summary::marker {
+            display: none;
+        }
+        
+        details[open] summary::after {
+            content: "▼";
+            margin-left: 8px;
+            color: #4f46e5;
+            transition: transform 0.2s ease;
+        }
+        
+        details:not([open]) summary::after {
+            content: "▶";
+            margin-left: 8px;
+            color: #4f46e5;
+            transition: transform 0.2s ease;
+        }
+        
+        details summary:hover {
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body>
@@ -943,6 +1141,35 @@
             <div style="display: flex; flex-direction: column; align-items: flex-start;">
                 <h1>ViLaBench</h1>
                 <p>Benchmark collection for Vision-Language Models (VLMs), hosted by the <a href="https://github.com/AntResearchNLP" target="_blank" style="color: #3b82f6; text-decoration: none; font-weight: 600; border-bottom: 2px solid rgba(59, 130, 246, 0.3); transition: all 0.3s ease; padding-bottom: 1px;">AntResearchNLP</a> team.</p>
+                <div style="margin-top: 16px; padding: 20px; background: rgba(59, 130, 246, 0.05); border-radius: 12px; border-left: 4px solid #3b82f6; max-width: 100%;">
+                    <p style="margin: 0; font-size: 0.85rem; line-height: 1.5; color: #374151;">
+                        These benchmark and result data are carefully compiled and merged from technical reports and official blogs of renowned multimodal models, including <a href="https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf" target="_blank" style="color: #3b82f6; text-decoration: none; font-weight: 600;">Google's Gemini series</a>, <a href="https://openai.com/index/introducing-o3-and-o4-mini/" target="_blank" style="color: #3b82f6; text-decoration: none; font-weight: 600;">OpenAI GPT-series and OpenAI o-series</a>, <a href="https://arxiv.org/pdf/2505.07062" target="_blank" style="color: #3b82f6; text-decoration: none; font-weight: 600;">Seed1.5-VL</a>, <a href="https://arxiv.org/pdf/2506.03569" target="_blank" style="color: #3b82f6; text-decoration: none; font-weight: 600;">MiMo-VL</a>, <a href="https://huggingface.co/moonshotai/Kimi-VL-A3B-Thinking-2506" target="_blank" style="color: #3b82f6; text-decoration: none; font-weight: 600;">Kimi-VL</a>, <a href="https://arxiv.org/pdf/2502.13923" target="_blank" style="color: #3b82f6; text-decoration: none; font-weight: 600;">Qwen2.5-VL</a>, <a href="https://arxiv.org/abs/2504.10479" target="_blank" style="color: #3b82f6; text-decoration: none; font-weight: 600;">InternVL3</a>, and other leading models' official technical documentation.
+                    </p>
+                    <p style="margin: 12px 0 0 0; font-size: 0.85rem; line-height: 1.5; color: #374151; font-weight: 500;">
+                        This collection provides researchers and developers with a comprehensive, standardized multimodal model evaluation benchmark comparison platform, helping to advance the development and research in the vision-language model field. Through unified data formats and visualization interfaces, users can more intuitively understand the performance of different models on various tasks, providing valuable references for model selection and improvement. Welcome to submit new benchmarks and results on <a href="https://github.com/AntResearchNLP/vilabench/issues" target="_blank" style="color: #3b82f6; text-decoration: none; font-weight: 600;">GitHub</a>!
+                    </p>
+                    
+                    <details style="margin-top: 20px; background: rgba(255, 255, 255, 0.7); border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.2); padding: 14px 18px;">
+                        <summary style="font-size: 0.85rem; font-weight: 600; color: #4f46e5; cursor: pointer; padding: 4px 0; user-select: none;">Table Headers Explanation</summary>
+                        <div style="margin-top: 12px; color: #374151; font-size: 0.8rem; line-height: 1.6;">
+                            <ul style="list-style: none; padding-left: 0;">
+                                <li style="margin-bottom: 6px;"><b>Benchmark</b>: The name of the vision-language benchmark. Click to visit the official page. <span style='color:#a5b4fc;'>🔗</span></li>
+                                <li style="margin-bottom: 6px;"><b>Year</b>: The year the benchmark was published or released.</li>
+                                <li style="margin-bottom: 6px;"><b>Cognitive Levels</b>: The main cognitive ability required:
+                                    <ul style="margin-top: 4px; margin-left: 16px; list-style: disc;">
+                                        <li style="margin-bottom: 3px;"><span class='tag tag-cognitive-understanding'>Understanding</span> - Basic comprehension and recognition tasks</li>
+                                        <li style="margin-bottom: 3px;"><span class='tag tag-cognitive-reasoning'>Reasoning</span> - Logical inference and problem-solving tasks</li>
+                                        <li style="margin-bottom: 3px;"><span class='tag tag-cognitive-comprehensive'>Comprehensive</span> - Involving both basic understanding and advanced reasoning tasks</li>
+                                    </ul>
+                                </li>
+                                <li style="margin-bottom: 6px;"><b>Domain</b>: The application domain or context (e.g., natural/synthetic images, chart, etc.).</li>
+                                <li style="margin-bottom: 6px;"><b>Modalities</b>: The input data type(s) required (e.g., <span class='tag tag-image'>Single-Image</span>, <span class='tag tag-multi-image'>Multi-Image</span>, <span class='tag tag-video'>Video</span>).</li>
+                                <li style="margin-bottom: 6px;"><b>Score</b>: Model performance scores on the benchmark. Click the chart to zoom in for more details.</li>
+                                <li style="margin-bottom: 6px; color: #64748b; font-style: italic;"><b>Note</b>: Benchmarks are grouped by category. Click on category headers to collapse/expand groups.</li>
+                            </ul>
+                        </div>
+                    </details>
+                </div>
             </div>
             <div class="github-badge-bar">
                 <svg class="gh-logo" viewBox="0 0 16 16" width="20" height="20" fill="white" aria-hidden="true">
@@ -966,49 +1193,9 @@
             </div>
         </div>
 
-        <div class="controls">
-            <div class="stats">
-                <div class="stat-item">
-                    <div class="stat-number" id="totalCount">-</div>
-                    <div class="stat-label">Total Benchmarks</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="imageCount">-</div>
-                    <div class="stat-label">Single-Image Benchmarks</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="multiImageCount">-</div>
-                    <div class="stat-label">Multi-Image Benchmarks</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="videoCount">-</div>
-                    <div class="stat-label">Video Benchmarks</div>
-                </div>
-            </div>
-        </div>
+
 
         <div class="table-container">
-                            <div class="table-explanation" id="tableExplanation">
-                <details style="background: #eef2ff; border-radius: 12px; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.07); padding: 18px 28px 18px 28px; margin-bottom: 18px; border: 1.5px solid #c7d2fe;">
-                    <summary style="font-size: 0.93rem; font-weight: 600; color: #4f46e5; outline: none; cursor: pointer; padding: 4px 0;">Table Header Explanation</summary>
-                    <div style="margin-top: 14px; color: #374151; font-size: 0.8rem; line-height: 1.7;">
-                        <ul style="list-style: none; padding-left: 0;">
-                            <li style="margin-bottom: 8px;"><b>Benchmark</b>: The name of the vision-language benchmark. Click to visit the official page. <span style='color:#a5b4fc;'>🔗</span></li>
-                            <li style="margin-bottom: 8px;"><b>Year</b>: The year the benchmark was published or released.</li>
-                            <li style="margin-bottom: 8px;"><b>Cognitive Levels</b>: The main cognitive ability required:
-                                <ul style="margin-top: 6px; margin-left: 16px; list-style: disc;">
-                                    <li style="margin-bottom: 4px;"><span class='tag tag-cognitive-understanding'>Understanding</span> - Basic comprehension and recognition tasks</li>
-                                    <li style="margin-bottom: 4px;"><span class='tag tag-cognitive-reasoning'>Reasoning</span> - Logical inference and problem-solving tasks</li>
-                                    <li style="margin-bottom: 4px;"><span class='tag tag-cognitive-comprehensive'>Comprehensive</span> - Involving both basic understanding and advanced reasoning tasks</li>
-                                </ul>
-                            </li>
-                            <li style="margin-bottom: 8px;"><b>Domain</b>: The application domain or context (e.g., natural/synthetic images, chart, etc.).</li>
-                            <li style="margin-bottom: 8px;"><b>Modalities</b>: The input data type(s) required (e.g., <span class='tag tag-image'>Single-Image</span>, <span class='tag tag-multi-image'>Multi-Image</span>, <span class='tag tag-video'>Video</span>).</li>
-                            <li style="margin-bottom: 8px;"><b>Score</b>: Model performance scores on the benchmark. Click the chart to zoom in for more details.</li>
-                            <li style="margin-bottom: 8px; color: #64748b; font-style: italic;"><b>Note</b>: Benchmarks are grouped by category. Click on category headers to collapse/expand groups.</li>
-                        </ul>
-                    </div>
-                </details>
                 <div style="margin-bottom: 18px;">
                     <div style="display: flex; align-items: center; justify-content: flex-start; margin-bottom: 16px;">
                         <button id="toggleAllCategories" style="background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); color: white; border: none; padding: 10px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);">
@@ -1032,6 +1219,26 @@
                             <select id="modelFilter" class="filter-select">
                                 <option value="">All Models</option>
                             </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Compact stats below filters -->
+                    <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; padding: 12px 0; border-top: 1px solid rgba(226, 232, 240, 0.6);">
+                        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #64748b;">
+                            <span style="font-weight: 600; color: #3b82f6; font-size: 1rem;" id="totalCount">-</span>
+                            <span>Total</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #64748b;">
+                            <span style="font-weight: 600; color: #10b981; font-size: 1rem;" id="imageCount">-</span>
+                            <span>Single-Image</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #64748b;">
+                            <span style="font-weight: 600; color: #f59e0b; font-size: 1rem;" id="multiImageCount">-</span>
+                            <span>Multi-Image</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #64748b;">
+                            <span style="font-weight: 600; color: #8b5cf6; font-size: 1rem;" id="videoCount">-</span>
+                            <span>Video</span>
                         </div>
                     </div>
                 </div>
