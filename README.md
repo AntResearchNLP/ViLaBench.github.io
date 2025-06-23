@@ -1,6 +1,6 @@
-# ViLaBench.github.io
+# ViLaBench
 
-This is a web project showcasing ViLaBench (Visual Language Model Benchmark) data.
+This is a web project showcasing collection of benchmarks for vision-language models.
 
 ## Features
 
@@ -37,4 +37,4 @@ The CSV file contains the following columns:
 
 ## GitHub Pages Deployment
 
-This project is configured for GitHub Pages and can be accessed directly at: https://vilabench.github.io
+This project is configured for GitHub Pages and can be accessed directly at: https://antresearchnlp.github.io/vilabench.github.io/
