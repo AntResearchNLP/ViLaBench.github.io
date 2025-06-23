@@ -949,7 +949,7 @@
                     1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
                 </svg>
                 <span class="gh-label">GitHub</span>
-                <a class="gh-btn" id="gh-star-btn" href="https://github.com/AntResearchNLP/ViLaBench.github.io" target="_blank" title="Star on GitHub" style="text-decoration:none;">
+                <a class="gh-btn" id="gh-star-btn" href="https://github.com/AntResearchNLP/vilabench" target="_blank" title="Star on GitHub" style="text-decoration:none;">
                     <span></span>
                     <span class="gh-count" id="gh-star-count">--</span>
                 </a>
@@ -1973,7 +1973,7 @@
         }
 
         // 动态获取GitHub Star数量
-        fetch('https://api.github.com/repos/AntResearchNLP/ViLaBench.github.io')
+        fetch('https://api.github.com/repos/AntResearchNLP/vilabench')
             .then(res => res.json())
             .then(data => {
                 if (data.stargazers_count !== undefined) {
