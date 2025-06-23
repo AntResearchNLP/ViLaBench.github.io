@@ -1,0 +1,2013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ViLaBench - Vision-Language Model Benchmark</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Choices.js CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 24px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.12), 0 8px 32px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            color: #334155;
+            padding: 48px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2394a3b8' fill-opacity='0.015'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+            opacity: 0.6;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 8px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #475569 0%, #64748b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.125rem;
+            opacity: 0.8;
+            color: #64748b;
+            font-weight: 400;
+        }
+
+        .controls {
+            padding: 40px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+            backdrop-filter: blur(10px);
+        }
+
+        .search-filter {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 16px 24px;
+            border: 2px solid rgba(226, 232, 240, 0.8);
+            border-radius: 16px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 400;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .search-box input::placeholder {
+            color: #94a3b8;
+            font-weight: 400;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            padding: 12px 44px 12px 20px;
+            border: 2px solid rgba(226, 232, 240, 0.8);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 15px;
+            color: #374151;
+            font-weight: 500;
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+            margin-right: 6px;
+            backdrop-filter: blur(10px);
+            background-image: url("data:image/svg+xml;utf8,<svg fill='%2394a3b8' height='18' viewBox='0 0 20 20' width='18' xmlns='http://www.w3.org/2000/svg'><path d='M7.293 7.293a1 1 0 011.414 0L10 8.586l1.293-1.293a1 1 0 111.414 1.414l-2 2a1 1 0 01-1.414 0l-2-2a1 1 0 010-1.414z'/></svg>");
+            background-repeat: no-repeat;
+            background-position: calc(100% - 14px) center;
+            background-size: 18px 18px;
+            min-width: fit-content;
+            white-space: nowrap;
+        }
+
+        .filter-select:focus, .filter-select:hover {
+            border-color: #3b82f6;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.12);
+            color: #1e40af;
+            transform: translateY(-2px);
+            background-image: url("data:image/svg+xml;utf8,<svg fill='%233b82f6' height='18' viewBox='0 0 20 20' width='18' xmlns='http://www.w3.org/2000/svg'><path d='M7.293 7.293a1 1 0 011.414 0L10 8.586l1.293-1.293a1 1 0 111.414 1.414l-2 2a1 1 0 01-1.414 0l-2-2a1 1 0 010-1.414z'/></svg>");
+            background-repeat: no-repeat;
+            background-position: calc(100% - 14px) center;
+            background-size: 18px 18px;
+        }
+
+        .filter-select option {
+            background: #f4f7ff;
+            color: #374151;
+            font-size: 15px;
+            border-radius: 12px;
+        }
+
+        .filter-select::-webkit-dropdown-list {
+            border-radius: 16px;
+            background: #f4f7ff;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            padding: 24px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.06), 0 2px 8px rgba(0, 0, 0, 0.03);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(59, 130, 246, 0.08), 0 8px 16px rgba(0, 0, 0, 0.06);
+        }
+
+        .stat-item:hover::before {
+            transform: scaleX(1);
+        }
+
+        .stat-number {
+            font-size: 2.25rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #64748b;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            padding: 32px;
+            background: rgba(248, 250, 252, 0.5);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 16px 48px rgba(59, 130, 246, 0.06), 0 4px 16px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+            color: white;
+            padding: 20px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            letter-spacing: 0.025em;
+            text-transform: uppercase;
+            border: none;
+        }
+
+        .data-table td {
+            padding: 16px;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+            font-size: 14px;
+            vertical-align: top;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .data-table tr:hover td {
+            background: rgba(59, 130, 246, 0.03);
+            backdrop-filter: blur(10px);
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Category group header styles */
+        .category-header {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+            border-bottom: 2px solid rgba(59, 130, 246, 0.1) !important;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .category-header:hover {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+            border-bottom: 2px solid rgba(59, 130, 246, 0.2) !important;
+        }
+
+        .category-header td {
+            padding: 16px !important;
+            font-weight: 700 !important;
+            color: #334155 !important;
+            font-size: 15px !important;
+            letter-spacing: 0.025em !important;
+            border: none !important;
+        }
+
+        .category-toggle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+            color: #334155;
+        }
+
+        .category-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+            font-size: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            flex-shrink: 0;
+        }
+
+        .category-header.collapsed .category-icon {
+            transform: rotate(-90deg);
+        }
+
+        .category-count {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        .category-row {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .category-row.hidden {
+            display: none;
+        }
+
+        /* Enhanced category styles */
+        .category-toggle:hover .category-icon {
+            background: rgba(59, 130, 246, 0.2);
+            transform: scale(1.1);
+        }
+
+        .category-header.collapsed .category-toggle span {
+            opacity: 0.7;
+        }
+
+        /* Animation for smooth expanding/collapsing */
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-10px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .category-row:not(.hidden) {
+            animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Mobile responsiveness for category headers and table controls */
+        @media (max-width: 768px) {
+            .category-toggle {
+                font-size: 14px;
+                gap: 8px;
+            }
+            
+            .category-icon {
+                width: 16px;
+                height: 16px;
+                font-size: 10px;
+            }
+            
+            .category-count {
+                font-size: 10px;
+                padding: 2px 6px;
+            }
+
+            .category-header td {
+                padding: 12px 8px !important;
+                font-size: 13px !important;
+            }
+
+            #toggleAllCategories {
+                font-size: 11px;
+                padding: 6px 12px;
+            }
+
+            .search-filter {
+                flex-direction: column !important;
+                gap: 16px !important;
+            }
+
+            .search-box {
+                min-width: auto !important;
+            }
+
+            .filter-group {
+                justify-content: center;
+                gap: 8px !important;
+            }
+        }
+
+        .benchmark-link {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            display: inline-block;
+        }
+
+        .benchmark-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .benchmark-link:hover {
+            color: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .benchmark-link:hover::after {
+            width: 100%;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin: 2px;
+            letter-spacing: 0.025em;
+            text-transform: uppercase;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tag:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .tag-image {
+            background: linear-gradient(135deg, rgba(25, 118, 210, 0.1) 0%, rgba(25, 118, 210, 0.2) 100%);
+            color: #1976d2;
+            border-color: rgba(25, 118, 210, 0.2);
+        }
+
+        .tag-multi-image {
+            background: linear-gradient(135deg, rgba(123, 31, 162, 0.1) 0%, rgba(123, 31, 162, 0.2) 100%);
+            color: #7b1fa2;
+            border-color: rgba(123, 31, 162, 0.2);
+        }
+
+        .tag-video {
+            background: linear-gradient(135deg, rgba(245, 124, 0, 0.1) 0%, rgba(245, 124, 0, 0.2) 100%);
+            color: #f57c00;
+            border-color: rgba(245, 124, 0, 0.2);
+        }
+
+        .tag-cognitive-understanding {
+            background: linear-gradient(135deg, rgba(0, 121, 107, 0.1) 0%, rgba(0, 121, 107, 0.2) 100%);
+            color: #00796b;
+            border-color: rgba(0, 121, 107, 0.2);
+        }
+
+        .tag-cognitive-reasoning {
+            background: linear-gradient(135deg, rgba(251, 192, 45, 0.1) 0%, rgba(251, 192, 45, 0.2) 100%);
+            color: #f57c00;
+            border-color: rgba(251, 192, 45, 0.2);
+        }
+
+        .tag-cognitive-comprehensive {
+            background: linear-gradient(135deg, rgba(194, 24, 91, 0.1) 0%, rgba(194, 24, 91, 0.2) 100%);
+            color: #c2185b;
+            border-color: rgba(194, 24, 91, 0.2);
+        }
+
+        .score-cell {
+            min-width: 300px;
+            max-width: 400px;
+            padding: 8px 12px !important;
+        }
+
+        .score-chart-container {
+            position: relative;
+            height: 140px;
+            width: 100%;
+            background: rgba(248, 250, 252, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid rgba(226, 232, 240, 0.6);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .score-chart-container:hover {
+            border-color: #3b82f6;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .score-chart-container::after {
+            content: 'Click to zoom';
+            position: absolute;
+            bottom: 8px;
+            right: 12px;
+            font-size: 10px;
+            color: #94a3b8;
+            opacity: 0;
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+        
+        .score-chart-container:hover::after {
+            opacity: 1;
+        }
+
+        .score-chart {
+            width: 100% !important;
+            height: 100% !important;
+            cursor: pointer;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 64px 32px;
+            color: #64748b;
+            font-size: 1.125rem;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            margin: 32px;
+            border: 1px solid rgba(226, 232, 240, 0.6);
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(59, 130, 246, 0.15);
+            border-radius: 50%;
+            border-top-color: #3b82f6;
+            animation: spin 1s linear infinite;
+            margin-left: 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInFromRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .container {
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .stat-item {
+            animation: slideInFromRight 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .stat-item:nth-child(1) { animation-delay: 0.1s; }
+        .stat-item:nth-child(2) { animation-delay: 0.2s; }
+        .stat-item:nth-child(3) { animation-delay: 0.3s; }
+        .stat-item:nth-child(4) { animation-delay: 0.4s; }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(248, 250, 252, 0.5);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #4f46e5 100%);
+        }
+
+        /* Selection styling */
+        ::selection {
+            background: rgba(59, 130, 246, 0.15);
+            color: #1a202c;
+        }
+
+        ::-moz-selection {
+            background: rgba(59, 130, 246, 0.15);
+            color: #1a202c;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 64px 32px;
+            color: #64748b;
+            font-size: 1.125rem;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            margin: 32px;
+            border: 1px solid rgba(226, 232, 240, 0.6);
+        }
+
+        .no-results::before {
+            content: '🔍';
+            display: block;
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.6;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+
+            .container {
+                border-radius: 16px;
+            }
+
+            .header {
+                padding: 32px 24px;
+            }
+
+            .header h1 {
+                font-size: 2.25rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+            }
+            
+            .controls {
+                padding: 24px;
+            }
+
+            .search-filter {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 16px;
+            }
+            
+            .search-box {
+                min-width: auto;
+            }
+
+            .search-box input {
+                padding: 14px 20px;
+            }
+            
+            .filter-group {
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .filter-select {
+                padding: 10px 36px 10px 16px;
+                font-size: 14px;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 16px;
+                margin-top: 24px;
+            }
+
+            .stat-item {
+                padding: 20px 16px;
+            }
+
+            .stat-number {
+                font-size: 1.875rem;
+            }
+
+            .stat-label {
+                font-size: 0.75rem;
+            }
+
+            .table-container {
+                padding: 16px;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 12px 8px;
+                font-size: 12px;
+            }
+
+            .data-table th {
+                padding: 16px 8px;
+            }
+            
+            .score-chart-container {
+                height: 100px;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .header {
+                flex-direction: column;
+                align-items: center;
+                padding: 28px 10px 24px 10px;
+            }
+            .github-badge-bar {
+                position: static;
+                margin: 0 auto 10px auto;
+                left: 0;
+                right: 0;
+                top: 0;
+                transform: scale(1);
+                justify-content: center;
+            }
+        }
+
+        .benchmark-cell a {
+            display: inline-block;
+            position: relative;
+            font-weight: 600;
+            color: #667eea;
+            text-decoration: none;
+            padding-bottom: 2px;
+            transition: color 0.3s ease;
+        }
+        
+        .benchmark-cell a::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: #764ba2;
+            transform: scaleX(0);
+            transform-origin: bottom right;
+            transition: transform 0.3s ease-out;
+        }
+
+        .benchmark-cell a:hover {
+            color: #764ba2;
+        }
+
+        .benchmark-cell a:hover::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+
+        .task-description {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+
+        .modality-tag {
+            display: inline-flex;
+        }
+
+        .category-row-0 { background: #f8f9fa; }
+        .category-row-1 { background: #f1f5ff; }
+        .category-row-2 { background: #f9f6f2; }
+        .category-row-3 { background: #f3f7f0; }
+        .category-row-4 { background: #fef6fb; }
+
+        .github-badge-bar {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 28px;
+            padding: 3px 10px 3px 8px;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.10);
+            position: absolute;
+            top: 18px;
+            right: 28px;
+            z-index: 10;
+            font-size: 0.92rem;
+            transform: scale(0.92);
+        }
+        .github-badge-bar .gh-logo {
+            width: 16px;
+            height: 16px;
+            margin-right: 5px;
+        }
+        .github-badge-bar .gh-label {
+            color: #fff;
+            font-size: 0.98rem;
+            font-weight: 600;
+            margin-right: 6px;
+            letter-spacing: 0.3px;
+            text-decoration: none;
+        }
+        .github-badge-bar .gh-btn {
+            display: inline-flex;
+            align-items: center;
+            background: transparent;
+            border: none;
+            border-radius: 12px;
+            min-width: 0;
+            height: 24px;
+            padding: 0 7px 0 5px;
+            margin-left: 2px;
+            cursor: pointer;
+            transition: background 0.18s, box-shadow 0.18s;
+            font-size: 0.92rem;
+            font-weight: 600;
+            gap: 3px;
+            box-shadow: 0 1px 4px rgba(102,126,234,0.07);
+            color: #fff;
+            text-decoration: none;
+        }
+        .github-badge-bar .gh-btn:hover {
+            background: #f3f4f6;
+            box-shadow: 0 2px 8px rgba(102,126,234,0.13);
+        }
+        .github-badge-bar .gh-btn svg {
+            width: 13px;
+            height: 13px;
+            fill: #6366f1;
+            margin-right: 1px;
+        }
+        .github-badge-bar .gh-count {
+            display: inline-block;
+            min-width: 28px;
+            padding: 0 8px;
+            background: none;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 12px;
+            text-align: center;
+            line-height: 24px;
+            height: 24px;
+            margin-left: 2px;
+            box-shadow: none;
+        }
+        .choices.filter-choices {
+            min-width: 140px;
+            border-radius: 16px;
+            background: #f4f7ff;
+            font-size: 15px;
+            color: #374151;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.07);
+            border: 2px solid #e0e7ef;
+        }
+        .choices__inner {
+            border-radius: 16px;
+            background: #f4f7ff;
+            border: none;
+            min-height: 44px;
+            padding: 8px 18px;
+        }
+        .choices__list--dropdown, .choices__list[aria-expanded] {
+            border-radius: 16px;
+            background: #f4f7ff;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.13);
+            border: 2px solid #e0e7ef;
+        }
+        .choices__item--selectable {
+            color: #374151;
+            font-size: 15px;
+            border-radius: 12px;
+            padding: 8px 12px;
+        }
+        .choices__item--selectable.is-highlighted {
+            background: #eef2ff;
+            color: #3730a3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <h1>ViLaBench</h1>
+                <p>Benchmark collection for Vision-Language Models (VLMs), hosted by the <a href="https://github.com/AntResearchNLP" target="_blank" style="color: #3b82f6; text-decoration: none; font-weight: 600; border-bottom: 2px solid rgba(59, 130, 246, 0.3); transition: all 0.3s ease; padding-bottom: 1px;">AntResearchNLP</a> team.</p>
+            </div>
+            <div class="github-badge-bar">
+                <svg class="gh-logo" viewBox="0 0 16 16" width="20" height="20" fill="white" aria-hidden="true">
+                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+                    0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52
+                    -.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2
+                    -3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82
+                    .64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08
+                    2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01
+                    1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                </svg>
+                <span class="gh-label">GitHub</span>
+                <a class="gh-btn" id="gh-star-btn" href="https://github.com/AntResearchNLP/ViLaBench.github.io" target="_blank" title="Star on GitHub" style="text-decoration:none;">
+                    <span></span>
+                    <span class="gh-count" id="gh-star-count">--</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalCount">-</div>
+                    <div class="stat-label">Total Benchmarks</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="imageCount">-</div>
+                    <div class="stat-label">Single-Image Benchmarks</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="multiImageCount">-</div>
+                    <div class="stat-label">Multi-Image Benchmarks</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="videoCount">-</div>
+                    <div class="stat-label">Video Benchmarks</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+                            <div class="table-explanation" id="tableExplanation">
+                <details style="background: #eef2ff; border-radius: 12px; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.07); padding: 18px 28px 18px 28px; margin-bottom: 18px; border: 1.5px solid #c7d2fe;">
+                    <summary style="font-size: 0.93rem; font-weight: 600; color: #4f46e5; outline: none; cursor: pointer; padding: 4px 0;">Table Header Explanation</summary>
+                    <div style="margin-top: 14px; color: #374151; font-size: 0.8rem; line-height: 1.7;">
+                        <ul style="list-style: none; padding-left: 0;">
+                            <li style="margin-bottom: 8px;"><b>Benchmark</b>: The name of the vision-language benchmark. Click to visit the official page. <span style='color:#a5b4fc;'>🔗</span></li>
+                            <li style="margin-bottom: 8px;"><b>Year</b>: The year the benchmark was published or released.</li>
+                            <li style="margin-bottom: 8px;"><b>Cognitive Levels</b>: The main cognitive ability required:
+                                <ul style="margin-top: 6px; margin-left: 16px; list-style: disc;">
+                                    <li style="margin-bottom: 4px;"><span class='tag tag-cognitive-understanding'>Understanding</span> - Basic comprehension and recognition tasks</li>
+                                    <li style="margin-bottom: 4px;"><span class='tag tag-cognitive-reasoning'>Reasoning</span> - Logical inference and problem-solving tasks</li>
+                                    <li style="margin-bottom: 4px;"><span class='tag tag-cognitive-comprehensive'>Comprehensive</span> - Involving both basic understanding and advanced reasoning tasks</li>
+                                </ul>
+                            </li>
+                            <li style="margin-bottom: 8px;"><b>Domain</b>: The application domain or context (e.g., natural/synthetic images, chart, etc.).</li>
+                            <li style="margin-bottom: 8px;"><b>Modalities</b>: The input data type(s) required (e.g., <span class='tag tag-image'>Single-Image</span>, <span class='tag tag-multi-image'>Multi-Image</span>, <span class='tag tag-video'>Video</span>).</li>
+                            <li style="margin-bottom: 8px;"><b>Score</b>: Model performance scores on the benchmark. Click the chart to zoom in for more details.</li>
+                            <li style="margin-bottom: 8px; color: #64748b; font-style: italic;"><b>Note</b>: Benchmarks are grouped by category. Click on category headers to collapse/expand groups.</li>
+                        </ul>
+                    </div>
+                </details>
+                <div style="margin-bottom: 18px;">
+                    <div style="display: flex; align-items: center; justify-content: flex-start; margin-bottom: 16px;">
+                        <button id="toggleAllCategories" style="background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); color: white; border: none; padding: 10px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);">
+                            <span>📂</span> Collapse All Categories
+                        </button>
+                    </div>
+                    <div class="search-filter" style="display: flex; gap: 20px; flex-wrap: wrap; align-items: center;">
+                        <div class="search-box" style="flex: 1; min-width: 300px;">
+                            <input type="text" id="searchInput" placeholder="Search benchmark, task, domain...">
+                        </div>
+                        <div class="filter-group" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                            <select id="yearFilter" class="filter-select">
+                                <option value="">All Years</option>
+                            </select>
+                            <select id="cognitiveFilter" class="filter-select">
+                                <option value="">All Cognitive Levels</option>
+                            </select>
+                            <select id="categoryFilter" class="filter-select">
+                                <option value="">All Categories</option>
+                            </select>
+                            <select id="modelFilter" class="filter-select">
+                                <option value="">All Models</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="loading" class="loading">Loading data...</div>
+            <div id="noResults" class="no-results" style="display: none;">No matching results found</div>
+            <table id="dataTable" class="data-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-column="Benchmark" style="width: 20%;">Benchmark <i class="fas fa-sort"></i></th>
+                        <th class="sortable" data-column="Year">Year <i class="fas fa-sort"></i></th>
+                        <th class="sortable" data-column="Cognitive Levels" style="width: 12%; white-space: nowrap;">Cognitive Levels <i class="fas fa-sort"></i></th>
+                        <th class="sortable" data-column="Domain" style="width: 15%;">Domain <i class="fas fa-sort"></i></th>
+                        <th  style="width: 12%;">Modalities</th>
+                        <th style="width: 35%;">Score</th>
+                    </tr>
+                </thead>
+                <tbody id="benchmark-table-body">
+                    <!-- Data will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    <script>
+        // Register Chart.js plugins
+        Chart.register(ChartDataLabels);
+
+        // Global model color mapping
+        const modelColorMap = new Map();
+        const colorPalette = [
+            '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4',
+            '#f97316', '#84cc16', '#ec4899', '#6366f1', '#14b8a6', '#f43f5e',
+            '#22c55e', '#a855f7', '#0ea5e9', '#eab308', '#d946ef', '#059669',
+            '#dc2626', '#7c3aed', '#0891b2', '#ca8a04', '#be123c', '#9333ea',
+            '#0d9488', '#b91c1c', '#7c2d12', '#365314', '#1e3a8a', '#581c87'
+        ];
+
+        // Function to get consistent color for a model
+        function getModelColor(modelName) {
+            if (!modelColorMap.has(modelName)) {
+                const colorIndex = modelColorMap.size % colorPalette.length;
+                modelColorMap.set(modelName, colorPalette[colorIndex]);
+            }
+            return modelColorMap.get(modelName);
+        }
+        
+        function wrapLabel(name, maxLength) {
+            if (name.length <= maxLength) {
+                return name;
+            }
+
+            if (name.includes('-')) {
+                const words = name.split('-');
+                const lines = [];
+                let currentLine = '';
+                for (let i = 0; i < words.length; i++) {
+                    const word = words[i];
+                    const separator = i < words.length - 1 ? '-' : '';
+                    if (currentLine.length > 0 && (currentLine + word).length > maxLength) {
+                        lines.push(currentLine);
+                        currentLine = word + separator;
+                    } else {
+                        currentLine += word + separator;
+                    }
+                }
+                lines.push(currentLine);
+                const wrappedLines = lines.map(line => line.endsWith('-') ? line.slice(0, -1) : line).filter(Boolean);
+                if (wrappedLines.length > 1) return wrappedLines;
+            }
+            
+            const result = [];
+            for (let i = 0; i < name.length; i += maxLength) {
+                result.push(name.substring(i, i + maxLength));
+            }
+            return result;
+        }
+
+        let allData = [];
+        let filteredData = [];
+
+        // Parse CSV data
+        function parseCSV(csv) {
+            const result = Papa.parse(csv, {
+                header: true,
+                skipEmptyLines: true,
+                transformHeader: header => header.trim().replace(/\s+/g, '_')
+            });
+
+            return result.data.map(row => ({
+                benchmark: row.Benchmark || '',
+                url: row.URL || '',
+                year: row.year || '',
+                cognitiveLevels: row.cognitive_levels || '',
+                category: row.category || '',
+                domain: row.domain || '',
+                task: row.task || '',
+                image: row.image || '',
+                multipleImage: row.multiple_image || '',
+                video: row.video || '',
+                score: row.score || ''
+            }));
+        }
+
+        // Create modality tags
+        function createModalityTags(image, multipleImage, video) {
+            const tags = [];
+            if (image && image.trim() !== '') {
+                tags.push('<span class="tag tag-image">Single-Image</span>');
+            }
+            if (multipleImage && multipleImage.trim() !== '') {
+                tags.push('<span class="tag tag-multi-image">Multi-Image</span>');
+            }
+            if (video && video.trim() !== '') {
+                tags.push('<span class="tag tag-video">Video</span>');
+            }
+            return tags.join(' ');
+        }
+
+        // Parse score data and create chart data
+        function parseScore(scoreStr) {
+            if (!scoreStr || scoreStr.trim() === '') {
+                return [];
+            }
+            
+            try {
+                // Handle CSV double-quote escaping: "" becomes "
+                let cleanStr = scoreStr.replace(/""/g, '"');
+                
+                // Remove outer quotes if present
+                if (cleanStr.startsWith('"') && cleanStr.endsWith('"')) {
+                    cleanStr = cleanStr.slice(1, -1);
+                }
+                
+                const score = JSON.parse(cleanStr);
+                const chartData = [];
+                
+                for (const [model, value] of Object.entries(score)) {
+                    if (typeof value === 'object' && value !== null) {
+                        // Handle multilingual scores or nested objects
+                        for (const [key, subValue] of Object.entries(value)) {
+                            if (typeof subValue === 'object' && subValue !== null) {
+                                // Handle deeper nesting
+                                for (const [deepKey, deepValue] of Object.entries(subValue)) {
+                                    if (typeof deepValue === 'number') {
+                                        chartData.push({
+                                            model: `${model}-${key}-${deepKey}`,
+                                            score: deepValue
+                                        });
+                                    }
+                                }
+                            } else if (typeof subValue === 'number') {
+                                chartData.push({
+                                    model: `${model}-${key}`,
+                                    score: subValue
+                                });
+                            }
+                        }
+                    } else if (typeof value === 'number') {
+                        chartData.push({
+                            model: model,
+                            score: value
+                        });
+                    }
+                }
+                
+                return chartData;
+            } catch (e) {
+                // If JSON parsing fails, return empty array
+                console.warn('Score parsing failed:', e, 'Original data:', scoreStr);
+                return [];
+            }
+        }
+
+        // Create chart for score data
+        function createScoreChart(containerId, chartData) {
+            if (chartData.length === 0) {
+                const container = document.getElementById(containerId).parentElement;
+                container.innerHTML = '<div style="text-align: center; color: #6c757d; padding: 20px; font-size: 12px;">No data</div>';
+                return;
+            }
+            
+            const ctx = document.getElementById(containerId).getContext('2d');
+            
+            // Sort data by model name alphabetically
+            chartData.sort((a, b) => a.model.localeCompare(b.model));
+            
+            // Limit to top 6 models for better readability
+            const displayData = chartData.slice(0, 6);
+            
+            // Calculate smart min/max for y-axis
+            const scores = displayData.map(item => item.score);
+            const minScore = Math.min(...scores);
+            const maxScore = Math.max(...scores);
+            const scoreRange = maxScore - minScore;
+            
+            // Smart y-axis range
+            let yMin, yMax;
+            
+            if (scoreRange === 0) {
+                yMin = minScore * 0.9;
+                yMax = maxScore * 1.1;
+            } else {
+                yMin = minScore - scoreRange;
+                yMax = maxScore + scoreRange * 0.1;
+            }
+            
+            yMin = Math.max(0, yMin);
+            
+            if (maxScore <= 100) {
+                yMax = Math.min(100, yMax);
+            }
+            
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: displayData.map(item => wrapLabel(item.model, 10)),
+                    datasets: [{
+                        label: 'Score',
+                        data: displayData.map(item => item.score),
+                        backgroundColor: displayData.map(item => getModelColor(item.model)),
+                        borderColor: displayData.map(item => getModelColor(item.model)),
+                        borderWidth: 0,
+                        borderRadius: 6,
+                        borderSkipped: false,
+                        barThickness: 'flex',
+                        maxBarThickness: 20,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: '#667eea',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            callbacks: {
+                                title: function(context) {
+                                    const index = context[0].dataIndex;
+                                    return displayData[index].model;
+                                },
+                                label: function(context) {
+                                    const score = context.parsed.y;
+                                    return [
+                                        `Model: ${displayData[context.dataIndex].model}`,
+                                        `Score: ${score.toFixed(1)}`
+                                    ];
+                                }
+                            }
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'bottom',
+                            color: 'white',
+                            font: {
+                                size: 10,
+                                weight: 'bold'
+                            },
+                            formatter: function(value) {
+                                return value.toFixed(1);
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            ticks: {
+                                maxRotation: 0,
+                                minRotation: 0,
+                                autoSkip: false,
+                                font: {
+                                    size: 9,
+                                    weight: '500'
+                                },
+                                color: '#6c757d'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            display: true,
+                            beginAtZero: false,
+                            min: yMin,
+                            max: yMax,
+                            ticks: {
+                                font: {
+                                    size: 9,
+                                    weight: '500'
+                                },
+                                color: '#6c757d',
+                                callback: function(value) {
+                                    return value.toFixed(0);
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0,0,0,0.05)',
+                                drawBorder: false
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+            
+            // Add click event for zoom functionality
+            ctx.canvas.style.cursor = 'pointer';
+            ctx.canvas.addEventListener('click', function() {
+                showZoomedChart(displayData, chartData);
+            });
+            
+            return chart;
+        }
+        
+        // Show zoomed chart in modal
+        function showZoomedChart(displayData, allData) {
+            // Create modal
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+                cursor: pointer;
+            `;
+            
+            // Create chart container
+            const chartContainer = document.createElement('div');
+            chartContainer.style.cssText = `
+                background: white;
+                border-radius: 15px;
+                padding: 30px;
+                max-width: 90%;
+                max-height: 90%;
+                overflow: auto;
+                position: relative;
+            `;
+            
+            // Create close button
+            const closeBtn = document.createElement('button');
+            closeBtn.innerHTML = '×';
+            closeBtn.style.cssText = `
+                position: absolute;
+                top: 10px;
+                right: 15px;
+                background: none;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                color: #666;
+                z-index: 10001;
+            `;
+            
+            // Create canvas for zoomed chart
+            const canvas = document.createElement('canvas');
+            canvas.width = 800;
+            canvas.height = 500;
+            
+            chartContainer.appendChild(closeBtn);
+            chartContainer.appendChild(canvas);
+            modal.appendChild(chartContainer);
+            document.body.appendChild(modal);
+            
+            // Create zoomed chart
+            const ctx = canvas.getContext('2d');
+            
+            // Sort all data alphabetically
+            allData.sort((a, b) => a.model.localeCompare(b.model));
+            
+            // Calculate smart min/max for y-axis
+            const scores = allData.map(item => item.score);
+            const minScore = Math.min(...scores);
+            const maxScore = Math.max(...scores);
+            const scoreRange = maxScore - minScore;
+            
+            let yMin, yMax;
+
+            if (scoreRange === 0) {
+                yMin = minScore * 0.9;
+                yMax = maxScore * 1.1;
+            } else {
+                yMin = minScore - scoreRange * 0.3;
+                yMax = maxScore + scoreRange * 0.1;
+            }
+            
+            yMin = Math.max(0, yMin);
+            
+            if (maxScore <= 100) {
+                yMax = Math.min(100, yMax);
+            }
+            
+            // Colors will be generated from model names using the global color map
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: allData.map(item => wrapLabel(item.model, 15)),
+                    datasets: [{
+                        label: 'Score',
+                        data: allData.map(item => item.score),
+                        backgroundColor: allData.map(item => getModelColor(item.model)),
+                        borderColor: allData.map(item => getModelColor(item.model)),
+                        borderWidth: 0,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                        barThickness: 'flex',
+                        maxBarThickness: 30,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.9)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: '#667eea',
+                            borderWidth: 2,
+                            cornerRadius: 10,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 12
+                            },
+                            callbacks: {
+                                title: function(context) {
+                                    return allData[context[0].dataIndex].model;
+                                },
+                                label: function(context) {
+                                    return `Score: ${context.parsed.y.toFixed(1)}`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'bottom',
+                            color: 'white',
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            },
+                            formatter: function(value) {
+                                return value.toFixed(1);
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            ticks: {
+                                maxRotation: 0,
+                                minRotation: 0,
+                                autoSkip: false,
+                                font: {
+                                    size: 12,
+                                    weight: '500'
+                                },
+                                color: '#333'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            display: true,
+                            beginAtZero: false,
+                            min: yMin,
+                            max: yMax,
+                            ticks: {
+                                font: {
+                                    size: 12,
+                                    weight: '500'
+                                },
+                                color: '#333',
+                                callback: function(value) {
+                                    return value.toFixed(0);
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)',
+                                drawBorder: false
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+            
+            // Close modal events
+            const closeModal = () => {
+                document.body.removeChild(modal);
+            };
+            
+            closeBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+            
+            // ESC key to close
+            const handleEsc = (e) => {
+                if (e.key === 'Escape') {
+                    closeModal();
+                    document.removeEventListener('keydown', handleEsc);
+                }
+            };
+            document.addEventListener('keydown', handleEsc);
+        }
+
+        // Render table with category grouping
+        function renderTable(data) {
+            const tableBody = document.getElementById('benchmark-table-body');
+            tableBody.innerHTML = '';
+            if (data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="no-results">No results found.</td></tr>';
+                return;
+            }
+
+            // Group data by category
+            const groupedData = {};
+            data.forEach(row => {
+                const category = row.category || 'Uncategorized';
+                if (!groupedData[category]) {
+                    groupedData[category] = [];
+                }
+                groupedData[category].push(row);
+            });
+
+            // Sort categories by their first appearance in the original data (preserve original order)
+            const sortedCategories = [];
+            data.forEach(row => {
+                const category = row.category || 'Uncategorized';
+                if (!sortedCategories.includes(category)) {
+                    sortedCategories.push(category);
+                }
+            });
+
+            let globalIndex = 0;
+
+            sortedCategories.forEach(category => {
+                const categoryData = groupedData[category];
+                
+                // Create category header row
+                const categoryRow = document.createElement('tr');
+                categoryRow.className = 'category-header';
+                categoryRow.dataset.category = category;
+                categoryRow.innerHTML = `
+                    <td colspan="6">
+                        <div class="category-toggle">
+                            <div class="category-icon">▼</div>
+                            <span>${category}</span>
+                            <div class="category-count">${categoryData.length}</div>
+                        </div>
+                    </td>
+                `;
+                
+                // Add click event for toggling
+                categoryRow.addEventListener('click', () => toggleCategory(category));
+                
+                tableBody.appendChild(categoryRow);
+
+                // Add data rows for this category
+                categoryData.forEach((row, localIndex) => {
+                    const tr = document.createElement('tr');
+                    tr.className = `category-row category-${category.replace(/\s+/g, '-').toLowerCase()}`;
+                    tr.dataset.category = category;
+                    tr.innerHTML = `
+                        <td class="benchmark-cell">
+                            <a href="${row.url}" target="_blank" class="benchmark-link">${row.benchmark}</a>
+                            <div class="task-description">${row.task}</div>
+                        </td>
+                        <td>${row.year}</td>
+                        <td>${renderCognitiveTags(row.cognitiveLevels)}</td>
+                        <td>${row.domain}</td>
+                        <td>
+                            ${createModalityTags(row.image, row.multipleImage, row.video)}
+                        </td>
+                        <td class="score-cell">
+                            <div class="score-chart-container">
+                                <canvas id="chart-${globalIndex}" class="score-chart"></canvas>
+                            </div>
+                        </td>
+                    `;
+                    tableBody.appendChild(tr);
+                    globalIndex++;
+                });
+            });
+
+            // Reset global collapse state when table is re-rendered
+            allCategoriesCollapsed = false;
+            const toggleButton = document.getElementById('toggleAllCategories');
+            if (toggleButton) {
+                toggleButton.innerHTML = '<span>📂</span> Collapse All Categories';
+            }
+
+            // Initialize charts after DOM is ready
+            setTimeout(() => {
+                let chartIndex = 0;
+                sortedCategories.forEach(category => {
+                    const categoryData = groupedData[category];
+                    categoryData.forEach((row) => {
+                        const chartData = parseScore(row.score);
+                        createScoreChart(`chart-${chartIndex}`, chartData);
+                        chartIndex++;
+                    });
+                });
+            }, 0);
+        }
+
+        // Toggle category visibility
+        function toggleCategory(category) {
+            const categoryHeader = document.querySelector(`.category-header[data-category="${category}"]`);
+            const categoryRows = document.querySelectorAll(`.category-row[data-category="${category}"]`);
+            const isCollapsed = categoryHeader.classList.contains('collapsed');
+
+            if (isCollapsed) {
+                // Expand
+                categoryHeader.classList.remove('collapsed');
+                categoryRows.forEach(row => row.classList.remove('hidden'));
+            } else {
+                // Collapse
+                categoryHeader.classList.add('collapsed');
+                categoryRows.forEach(row => row.classList.add('hidden'));
+            }
+        }
+
+        // Toggle all categories
+        let allCategoriesCollapsed = false;
+        function toggleAllCategories() {
+            const toggleButton = document.getElementById('toggleAllCategories');
+            const categoryHeaders = document.querySelectorAll('.category-header');
+            const categoryRows = document.querySelectorAll('.category-row');
+
+            if (allCategoriesCollapsed) {
+                // Expand all
+                categoryHeaders.forEach(header => header.classList.remove('collapsed'));
+                categoryRows.forEach(row => row.classList.remove('hidden'));
+                toggleButton.innerHTML = '<span>📂</span> Collapse All Categories';
+                allCategoriesCollapsed = false;
+            } else {
+                // Collapse all
+                categoryHeaders.forEach(header => header.classList.add('collapsed'));
+                categoryRows.forEach(row => row.classList.add('hidden'));
+                toggleButton.innerHTML = '<span>📁</span> Expand All Categories';
+                allCategoriesCollapsed = true;
+            }
+        }
+
+        // Update statistics
+        function updateStats(data) {
+            document.getElementById('totalCount').textContent = data.length;
+            document.getElementById('imageCount').textContent = data.filter(item => item.image && item.image.trim() !== '').length;
+            document.getElementById('multiImageCount').textContent = data.filter(item => item.multipleImage && item.multipleImage.trim() !== '').length;
+            document.getElementById('videoCount').textContent = data.filter(item => item.video && item.video.trim() !== '').length;
+        }
+
+        // Populate filter options
+        function populateFilters(filteredData, allData, skipFilter = null) {
+            // 保存当前选中值
+            const currentCognitive = document.getElementById('cognitiveFilter').value;
+            const currentCategory = document.getElementById('categoryFilter').value;
+            const currentYear = document.getElementById('yearFilter').value;
+            const currentModel = document.getElementById('modelFilter').value;
+
+            // 统计各选项在allData中的总数
+            const cognitiveCount = {};
+            const categoryCount = {};
+            const yearCount = {};
+            allData.forEach(item => {
+                item.cognitiveLevels.split(',').forEach(level => {
+                    const trimmed = level.trim();
+                    if (trimmed) cognitiveCount[trimmed] = (cognitiveCount[trimmed] || 0) + 1;
+                });
+                if (item.category) categoryCount[item.category] = (categoryCount[item.category] || 0) + 1;
+                if (item.year) yearCount[item.year] = (yearCount[item.year] || 0) + 1;
+            });
+
+            // 统计各选项在filteredData中的数量
+            const filteredCognitiveCount = {};
+            const filteredCategoryCount = {};
+            const filteredYearCount = {};
+            filteredData.forEach(item => {
+                item.cognitiveLevels.split(',').forEach(level => {
+                    const trimmed = level.trim();
+                    if (trimmed) filteredCognitiveCount[trimmed] = (filteredCognitiveCount[trimmed] || 0) + 1;
+                });
+                if (item.category) filteredCategoryCount[item.category] = (filteredCategoryCount[item.category] || 0) + 1;
+                if (item.year) filteredYearCount[item.year] = (filteredYearCount[item.year] || 0) + 1;
+            });
+
+            const cognitiveLevels = [...new Set(allData.flatMap(item => item.cognitiveLevels.split(',').map(l => l.trim())).filter(Boolean))].sort();
+            const categories = [...new Set(allData.map(item => item.category).filter(Boolean))];
+            const years = [...new Set(allData.map(item => item.year))].sort();
+
+            const cognitiveFilter = document.getElementById('cognitiveFilter');
+            const categoryFilter = document.getElementById('categoryFilter');
+            const yearFilter = document.getElementById('yearFilter');
+            const modelFilter = document.getElementById('modelFilter');
+
+            // 清空旧选项并重新填充（跳过指定的筛选框）
+            if (skipFilter !== 'cognitive') {
+                cognitiveFilter.innerHTML = `<option value="">All Cognitive Levels (${filteredData.length})</option>`;
+                cognitiveLevels.forEach(level => {
+                    const option = document.createElement('option');
+                    option.value = level;
+                    option.textContent = `${level} (${filteredCognitiveCount[level] || 0})`;
+                    if (level === currentCognitive) option.selected = true;
+                    cognitiveFilter.appendChild(option);
+                });
+            }
+
+            if (skipFilter !== 'category') {
+                categoryFilter.innerHTML = `<option value="">All Categories (${filteredData.length})</option>`;
+                categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = `${category} (${filteredCategoryCount[category] || 0})`;
+                    if (category === currentCategory) option.selected = true;
+                    categoryFilter.appendChild(option);
+                });
+            }
+
+            if (skipFilter !== 'year') {
+                yearFilter.innerHTML = `<option value="">All Years (${filteredData.length})</option>`;
+                years.forEach(year => {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = `${year} (${filteredYearCount[year] || 0})`;
+                    if (year === currentYear) option.selected = true;
+                    yearFilter.appendChild(option);
+                });
+            }
+
+            const allModels = getAllModels(allData);
+            const filteredModelCount = {};
+            filteredData.forEach(row => {
+                if (row.score && row.score.trim() !== '') {
+                    try {
+                        let cleanStr = row.score.replace(/""/g, '"');
+                        if (cleanStr.startsWith('"') && cleanStr.endsWith('"')) {
+                            cleanStr = cleanStr.slice(1, -1);
+                        }
+                        const scoreObj = JSON.parse(cleanStr);
+                        Object.keys(scoreObj).forEach(model => {
+                            filteredModelCount[model] = (filteredModelCount[model] || 0) + 1;
+                        });
+                    } catch (e) {}
+                }
+            });
+
+            if (skipFilter !== 'model') {
+                modelFilter.innerHTML = `<option value="">All Models (${filteredData.length})</option>`;
+                allModels.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model;
+                    option.textContent = `${model} (${filteredModelCount[model] || 0})`;
+                    if (model === currentModel) option.selected = true;
+                    modelFilter.appendChild(option);
+                });
+            }
+
+            // 恢复All选项的选中状态（如果当前为All）
+            if (skipFilter !== 'cognitive' && !currentCognitive) cognitiveFilter.value = '';
+            if (skipFilter !== 'category' && !currentCategory) categoryFilter.value = '';
+            if (skipFilter !== 'year' && !currentYear) yearFilter.value = '';
+            if (skipFilter !== 'model' && !currentModel) modelFilter.value = '';
+
+            // 重新初始化 Choices（只在有筛选框被更新时）
+            if (skipFilter !== 'all') {
+                setTimeout(initChoices, 0);
+            }
+        }
+
+        // Filter data
+        function filterData(skipFilter = null) {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const cognitiveFilter = document.getElementById('cognitiveFilter').value;
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const yearFilter = document.getElementById('yearFilter').value;
+            const modelFilter = document.getElementById('modelFilter').value;
+
+            filteredData = allData.filter(item => {
+                const matchesSearch = !searchTerm || 
+                    item.benchmark.toLowerCase().includes(searchTerm) ||
+                    item.task.toLowerCase().includes(searchTerm) ||
+                    item.category.toLowerCase().includes(searchTerm);
+                
+                const matchesCognitive = !cognitiveFilter || item.cognitiveLevels === cognitiveFilter;
+                const matchesCategory = !categoryFilter || item.category === categoryFilter;
+                const matchesYear = !yearFilter || item.year === yearFilter;
+                let matchesModel = true;
+                if (modelFilter) {
+                    matchesModel = false;
+                    if (item.score && item.score.trim() !== '') {
+                        try {
+                            let cleanStr = item.score.replace(/""/g, '"');
+                            if (cleanStr.startsWith('"') && cleanStr.endsWith('"')) {
+                                cleanStr = cleanStr.slice(1, -1);
+                            }
+                            const scoreObj = JSON.parse(cleanStr);
+                            if (Object.keys(scoreObj).includes(modelFilter)) {
+                                matchesModel = true;
+                            }
+                        } catch (e) {}
+                    }
+                }
+
+                return matchesSearch && matchesCognitive && matchesCategory && matchesYear && matchesModel;
+            });
+
+            renderTable(filteredData);
+            updateStats(filteredData);
+            populateFilters(filteredData, allData, skipFilter);
+            
+            // Show/hide table and message
+            const table = document.getElementById('dataTable');
+            const noResults = document.getElementById('noResults');
+            
+            if (filteredData.length === 0) {
+                table.style.display = 'none';
+                noResults.style.display = 'block';
+            } else {
+                table.style.display = 'table';
+                noResults.style.display = 'none';
+            }
+        }
+
+        // Load CSV data
+        async function loadData() {
+            try {
+                const response = await fetch('vilabench.csv');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const csvText = await response.text();
+                allData = parseCSV(csvText);
+                
+                // Hide loading state
+                document.getElementById('loading').style.display = 'none';
+                
+                // Initialize interface
+                populateFilters(allData, allData, null);
+                filteredData = allData;
+                renderTable(filteredData);
+                updateStats(filteredData);
+                
+                // Show table
+                document.getElementById('dataTable').style.display = 'table';
+                
+            } catch (error) {
+                console.error('Failed to load data:', error);
+                const loadingElement = document.getElementById('loading');
+                loadingElement.textContent = `Failed to load data: ${error.message}`;
+                loadingElement.style.color = '#dc3545';
+            }
+        }
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', () => filterData());
+        document.getElementById('cognitiveFilter').addEventListener('change', () => filterData('cognitive'));
+        document.getElementById('categoryFilter').addEventListener('change', () => filterData('category'));
+        document.getElementById('yearFilter').addEventListener('change', () => filterData('year'));
+        document.getElementById('modelFilter').addEventListener('change', () => filterData('model'));
+        
+        // Add toggle all categories button event listener after DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                const toggleButton = document.getElementById('toggleAllCategories');
+                if (toggleButton) {
+                    toggleButton.addEventListener('click', toggleAllCategories);
+                }
+            }, 100);
+        });
+
+        // Start loading data when page loads
+        loadData();
+
+        // Render cognitive tags
+        function renderCognitiveTags(levels) {
+            if (!levels) return '';
+            return levels.split(',').map(level => {
+                const trimmed = level.trim().toLowerCase();
+                if (trimmed === 'understanding') {
+                    return '<span class="tag tag-cognitive-understanding">Understanding</span>';
+                } else if (trimmed === 'reasoning') {
+                    return '<span class="tag tag-cognitive-reasoning">Reasoning</span>';
+                } else if (trimmed === 'comprehensive') {
+                    return '<span class="tag tag-cognitive-comprehensive">Comprehensive</span>';
+                } else {
+                    return `<span class="tag">${level.trim()}</span>`;
+                }
+            }).join(' ');
+        }
+
+        // 在populateFilters函数中统计所有模型名
+        function getAllModels(data) {
+            const modelSet = new Set();
+            data.forEach(row => {
+                if (row.score && row.score.trim() !== '') {
+                    try {
+                        let cleanStr = row.score.replace(/""/g, '"');
+                        if (cleanStr.startsWith('"') && cleanStr.endsWith('"')) {
+                            cleanStr = cleanStr.slice(1, -1);
+                        }
+                        const scoreObj = JSON.parse(cleanStr);
+                        Object.keys(scoreObj).forEach(model => modelSet.add(model));
+                    } catch (e) {}
+                }
+            });
+            return Array.from(modelSet).sort((a, b) => a.localeCompare(b));
+        }
+
+        // 动态获取GitHub Star数量
+        fetch('https://api.github.com/repos/AntResearchNLP/ViLaBench.github.io')
+            .then(res => res.json())
+            .then(data => {
+                if (data.stargazers_count !== undefined) {
+                    document.getElementById('gh-star-count').textContent = data.stargazers_count;
+                }
+            });
+
+        // 全局保存 Choices 实例
+        let choicesInstances = [];
+        // 销毁所有 Choices 实例
+        function destroyChoices() {
+            choicesInstances.forEach(instance => instance.destroy());
+            choicesInstances = [];
+        }
+        // 初始化 Choices.js
+        function initChoices() {
+            destroyChoices();
+            const selects = document.querySelectorAll('.filter-select');
+            selects.forEach(select => {
+                const instance = new Choices(select, {
+                    searchEnabled: false,
+                    itemSelectText: '',
+                    shouldSort: false,
+                    classNames: {
+                        containerOuter: 'choices filter-choices',
+                    }
+                });
+                choicesInstances.push(instance);
+            });
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            // Choices.js 需在数据渲染后初始化
+            setTimeout(initChoices, 300); // 确保select已渲染
+        });
+    </script>
+</body>
+</html> 
