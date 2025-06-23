@@ -37,4 +37,4 @@ The CSV file contains the following columns:
 
 ## GitHub Pages Deployment
 
-This project is configured for GitHub Pages and can be accessed directly at: https://antresearchnlp.github.io/vilabench.github.io/
+This project is configured for GitHub Pages and can be accessed directly at: https://antresearchnlp.github.io/vilabench
