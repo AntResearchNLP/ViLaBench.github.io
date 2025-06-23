@@ -882,6 +882,12 @@
             fill: #6366f1;
             margin-right: 1px;
         }
+        .github-badge-bar .gh-count svg {
+            width: 16px !important;
+            height: 16px !important;
+            fill: #fbbf24 !important;
+            margin-right: 6px !important;
+        }
         .github-badge-bar .gh-count {
             display: inline-block;
             min-width: 28px;
@@ -951,7 +957,11 @@
                 <span class="gh-label">GitHub</span>
                 <a class="gh-btn" id="gh-star-btn" href="https://github.com/AntResearchNLP/vilabench" target="_blank" title="Star on GitHub" style="text-decoration:none;">
                     <span></span>
-                    <span class="gh-count" id="gh-star-count">--</span>
+                    <span class="gh-count" id="gh-star-count">
+                        <svg viewBox="0 0 12 12" style="vertical-align: middle;">
+                            <path d="M6 0L7.854 3.708L12 4.292L9 7.208L9.708 11.292L6 9.5L2.292 11.292L3 7.208L0 4.292L4.146 3.708L6 0Z"/>
+                        </svg>--
+                    </span>
                 </a>
             </div>
         </div>
@@ -1977,7 +1987,11 @@
             .then(res => res.json())
             .then(data => {
                 if (data.stargazers_count !== undefined) {
-                    document.getElementById('gh-star-count').textContent = data.stargazers_count;
+                    document.getElementById('gh-star-count').innerHTML = `
+                        <svg viewBox="0 0 12 12" style="vertical-align: middle;">
+                            <path d="M6 0L7.854 3.708L12 4.292L9 7.208L9.708 11.292L6 9.5L2.292 11.292L3 7.208L0 4.292L4.146 3.708L6 0Z"/>
+                        </svg>${data.stargazers_count}
+                    `;
                 }
             });
 
