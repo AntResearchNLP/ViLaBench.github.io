@@ -1,5 +1,5 @@
 # ViLaBench
-## Please directly see https://antresearchnlp.github.io/vilabench/ for visualization of the benchmark collection.##
+**Please directly see https://antresearchnlp.github.io/vilabench/ for visualization of the benchmark collection.**
 
 This is a web project showcasing a collection of benchmarks for vision-language models.
 
