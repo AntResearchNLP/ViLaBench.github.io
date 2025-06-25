@@ -1,6 +1,7 @@
 # ViLaBench
+## Please directly see https://antresearchnlp.github.io/vilabench/ for visualization of the benchmark collection.##
 
-This is a web project showcasing collection of benchmarks for vision-language models.
+This is a web project showcasing a collection of benchmarks for vision-language models.
 
 These benchmark and result data are carefully compiled and merged from technical reports and official blogs of renowned multimodal models, including Google's Gemini series ([Gemini 2.5 Report](https://storage.googleapis.com/deepmind-media/gemini/gemini_v2_5_report.pdf)), OpenAI GPT series and OpenAI o series ([OpenAI o3 and o4-mini](https://openai.com/index/introducing-o3-and-o4-mini/)), [Seed1.5-VL](https://arxiv.org/pdf/2505.07062), [MiMo-VL](https://arxiv.org/pdf/2506.03569), [Kimi-VL](https://huggingface.co/moonshotai/Kimi-VL-A3B-Thinking-2506), [Qwen2.5-VL](https://arxiv.org/pdf/2502.13923), [InternVL3](https://arxiv.org/abs/2504.10479), and other leading models' official technical documentation.
 
@@ -15,7 +16,7 @@ This collection provides researchers and developers with a comprehensive, standa
 - 📱 **Responsive Design**: Supports both desktop and mobile devices
 - 📈 **Statistics**: Real-time display of data statistics
 
-## Usage
+## Local Usage
 
 1. Ensure `vilabench.csv` and `index.html` are in the same directory
 2. Use a local server to open the webpage (to avoid CORS issues):
